@@ -79,3 +79,27 @@ B = A & B
 A - B = '1' | '4'
 */
 export type SymmetricDifference<A, B> = SetDifference<A | B, A & B>;
+
+/*
+undefined이면 never, 아니면 반환.
+never는 존재할 수 없는 상태를 표현하는 타입.
+never 타입의 변수에는 어떤 값을 할당해도 컴파일 에러가 발생함.
+naked type parameter를 받는 Conditional types에서 never는 거절의 의미를 가짐.
+
+NonUndefined<string | null | undefined>;
+*/
+ export type NonUndefined<A> = A extends undefined ? never : A;
+
+/*
+ -?: Remove Optional(즉, 존재해야 함을 표현)
+ [K in keyof T]-?: T의 모든 프로퍼티 키를 K에 할당하며 순회
+ NonUndefined<T[K]>: T의 프로퍼티가 참조하는 값이 undefined인 Union Type
+ NonUndefined<T[K]> extends Function ? K : never: T의 프로퍼티가 참조하는 값이 Function 타입이면 키를 반환, 아니면 제외
+
+ 결국,
+ object인 T의 프로퍼티 중에서 프로퍼티 타입이 Function인 프로퍼티 키를 갖는 개체 타입을 정의하고, 
+ 이 개체 타입의 모든 키를 Union Type으로 변환
+*/
+export type FunctionKeys<T extends object> = {
+    [K in keyof T]-?: NonUndefined<T[K]> extends Function ? K : never;
+}[keyof T];
