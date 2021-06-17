@@ -99,7 +99,30 @@ NonUndefined<string | null | undefined>;
  결국,
  object인 T의 프로퍼티 중에서 프로퍼티 타입이 Function인 프로퍼티 키를 갖는 개체 타입을 정의하고, 
  이 개체 타입의 모든 키를 Union Type으로 변환
+
+ {}[keyof T]의 역할은 https://stackoverflow.com/questions/64072249/typescript-type-declaration-with-square-brackets 참고
+ 만들어진 타입에서 T의 키에 해당하는 값만 유니온 타입으로 추출하는 역할.
 */
 export type FunctionKeys<T extends object> = {
     [K in keyof T]-?: NonUndefined<T[K]> extends Function ? K : never;
 }[keyof T];
+
+export type NonFunctionKeys<T extends object> = {
+    [K in keyof T]-?: NonUndefined<T[K]> extends Function ? never : K;
+}[keyof T]
+
+// /*
+//  X, Y, A = X, B = never를 인자로 제네릭 파라미터로 받음.
+//
+//  <T>() => T extends X ? 1 : 2
+//  : T는 아직 미정이므로 1
+//
+//  (<T>() => T extends Y ? 1 : 2)
+//  : T와 Y가 같다고 판정할 수 있다면 1, 아니면 2
+//
+//  결론적으로,
+//  X extends Y ? A : B
+// */
+// export type IfEquals<X, Y, A = X, B = never> =
+//     (<T>() => T extends X ? 1 : 2) extends
+//     (<T>() => T extends Y ? 1 : 2) ? A : B;
