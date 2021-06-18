@@ -111,18 +111,30 @@ export type NonFunctionKeys<T extends object> = {
     [K in keyof T]-?: NonUndefined<T[K]> extends Function ? never : K;
 }[keyof T]
 
-// /*
-//  X, Y, A = X, B = never를 인자로 제네릭 파라미터로 받음.
-//
-//  <T>() => T extends X ? 1 : 2
-//  : T는 아직 미정이므로 1
-//
-//  (<T>() => T extends Y ? 1 : 2)
-//  : T와 Y가 같다고 판정할 수 있다면 1, 아니면 2
-//
-//  결론적으로,
-//  X extends Y ? A : B
-// */
-// export type IfEquals<X, Y, A = X, B = never> =
-//     (<T>() => T extends X ? 1 : 2) extends
-//     (<T>() => T extends Y ? 1 : 2) ? A : B;
+/*
+아래 코드가 동작하는 방식 탐구.
+(<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y ? 1 : 2) ? A : B
+
+조건 타입(conditional type) 간의 호환성(compatibility or assignability)을 판단할 때 비교 효율을 높이고자 아래의 단축 경로를 적용하는 케이스가 있음.
+> 조건 타입의 구성이 "A extends B ? C : D"와 같을 때 A, B, C, D가 모두 같으면 두 조건 타입은 같다.
+
+따라서 T extends X ? 1 : 2와 T extends Y ? 1 : 2는 X와 Y만 같으면 동치라고 판단함.
+(참고: https://github.com/microsoft/TypeScript/pull/21782?fbclid=IwAR0pxAn6DDLv8NYULWBSCmsJvNypDJ1X-gMjk0s34ooYsfMCgpdqLDPCWWA)
+
+그런데 IfEquals 타입 인터페이스 설계상 T를 알 수 없는 게 문제.
+지연 조건 타입(conditional types being deferred)을 끌어와서 이 문제를 해결함.
+그게 바로 "(<T>() => T extends X ? 1 : 2)" 이 부분.
+"<T>() => T" 함수 타입의 T를 알 수 없기 때문에 지연 조건 타입으로 분류되고,
+지연 조건 타입이 있을 때 TypeScript는 조건 타입 호환성 비교에 아래의 규칙을 적용함.
+
+- 두 조건 타입이 같은 제약 조건을 가지고 있는가?
+- 두 조건 타입의 참, 거짓 부분이 둘 다 같은 타입으로 구성되어 있는가?
+
+결국 A extends B ? C : D에서 A가 지연 조건 타입이면 B, C, D만 보고 동치를 판단함.
+(참고: https://github.com/Microsoft/TypeScript/issues/27024?fbclid=IwAR3CIouvyMCA4TTq9wbRAx1P9EMihL4_13GHZoL9htJkP0Tmh184Qnp5hwY#issuecomment-510924206)
+
+이 규칙을 따라서 X와 Y가 같은 타입이면 참, 아니면 거짓으로 판정하는 원리.
+*/
+export type IfEquals<X, Y, A = X, B = never> =
+    (<T>() => T extends X ? 1 : 2) extends
+    (<T>() => T extends Y ? 1 : 2) ? A : B;
