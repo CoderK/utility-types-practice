@@ -91,7 +91,7 @@ NonUndefined<string | null | undefined>;
  export type NonUndefined<A> = A extends undefined ? never : A;
 
 /*
- -?: Remove Optional(즉, 존재해야 함을 표현)
+ -?: Remove Optional(즉, 존재해야 함을 표현) https://stackoverflow.com/questions/52417131/what-does-mean-in-typescript
  [K in keyof T]-?: T의 모든 프로퍼티 키를 K에 할당하며 순회
  NonUndefined<T[K]>: T의 프로퍼티가 참조하는 값이 undefined인 Union Type
  NonUndefined<T[K]> extends Function ? K : never: T의 프로퍼티가 참조하는 값이 Function 타입이면 키를 반환, 아니면 제외
@@ -135,6 +135,42 @@ export type NonFunctionKeys<T extends object> = {
 
 이 규칙을 따라서 X와 Y가 같은 타입이면 참, 아니면 거짓으로 판정하는 원리.
 */
-export type IfEquals<X, Y, A = X, B = never> =
+type IfEquals<X, Y, A = X, B = never> =
     (<T>() => T extends X ? 1 : 2) extends
     (<T>() => T extends Y ? 1 : 2) ? A : B;
+
+/*
+[keyof T]
+: T의 key에 해당하는 값을 유니온 타입으로 가져오기
+
+[P in keyof T]-?
+: T의 key를 순회하며 P에 할당하며 Optional 속성 제거(필수로 지정)
+
+{ [Q in P]: T[P] }
+: P의 key인 Q를 key로, T[P]를 값으로 갖는 개체 타입 선언
+
+{ -readonly [Q in P]: T[P]}
+: 위의 타입과 같지만 key에서 readonly 속성을 제거. 즉 { [Q in P]: T[P] } 타입의 완전 Mutable 버전.
+
+IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P]}, P>
+: 두 타입이 같으면 P 아니면 never(IfEquals 정의를 따라)
+: 결국 readonly 속성을 제거한 Mutable한 키이면 키를 반환, 그렇지 않으면 never를 반환.
+*/
+export type MutableKeys<T extends object> = {
+    [P in keyof T]-?: IfEquals<
+        { [Q in P]: T[P] },
+        { -readonly [Q in P]: T[P]},
+        P
+    >
+}[keyof T]
+
+export type WritableKeys<T extends object> = MutableKeys<T>;
+
+export type ReadonlyKeys<T extends object> = {
+    [P in keyof T]-?: IfEquals<
+        { [Q in P]: T[P]},
+        { -readonly [Q in P]: T[P]},
+        never,
+        P
+    >
+}[keyof T]
