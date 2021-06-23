@@ -174,3 +174,17 @@ export type ReadonlyKeys<T extends object> = {
         P
     >
 }[keyof T];
+
+/*
+"{} extends Pick<T, K>"
+컴파일러는 {}를 모든 속성이 Optional인 Weak Type으로 평가함.
+T의 키(K)를 순회하며 {}와 동치인지 비교하는데 K가 Optional이어야 동치로 판정됨.
+결국, K가 Optional이면 never, 아니면 K를 반환하는 원리.
+ */
+export type RequiredKeys<T> = {
+    [K in keyof T]: {} extends Pick<T, K> ? never : K;
+}[keyof T];
+
+export type OptionalKeys<T> = {
+    [K in keyof T]: {} extends Pick<T, K> ? K : never;
+}[keyof T];
