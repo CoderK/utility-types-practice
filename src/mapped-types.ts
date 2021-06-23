@@ -109,7 +109,7 @@ export type FunctionKeys<T extends object> = {
 
 export type NonFunctionKeys<T extends object> = {
     [K in keyof T]-?: NonUndefined<T[K]> extends Function ? never : K;
-}[keyof T]
+}[keyof T];
 
 /*
 아래 코드가 동작하는 방식 탐구.
@@ -162,7 +162,7 @@ export type MutableKeys<T extends object> = {
         { -readonly [Q in P]: T[P]},
         P
     >
-}[keyof T]
+}[keyof T];
 
 export type WritableKeys<T extends object> = MutableKeys<T>;
 
@@ -173,4 +173,4 @@ export type ReadonlyKeys<T extends object> = {
         never,
         P
     >
-}[keyof T]
+}[keyof T];
