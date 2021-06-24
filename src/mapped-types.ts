@@ -97,7 +97,7 @@ NonUndefined<string | null | undefined>;
  NonUndefined<T[K]> extends Function ? K : never: T의 프로퍼티가 참조하는 값이 Function 타입이면 키를 반환, 아니면 제외
 
  결국,
- object인 T의 프로퍼티 중에서 프로퍼티 타입이 Function인 프로퍼티 키를 갖는 개체 타입을 정의하고, 
+ object인 T의 프로퍼티 중에서 프로퍼티 타입이 Function인 프로퍼티 키를 갖는 개체 타입을 정의하고,
  이 개체 타입의 모든 키를 Union Type으로 변환
 
  {}[keyof T]의 역할은 https://stackoverflow.com/questions/64072249/typescript-type-declaration-with-square-brackets 참고
@@ -188,3 +188,27 @@ export type RequiredKeys<T> = {
 export type OptionalKeys<T> = {
     [K in keyof T]: {} extends Pick<T, K> ? K : never;
 }[keyof T];
+
+
+export type PickByValue<T, ValueType> = Pick<
+    T,
+    { [Key in keyof T]-?: T[Key] extends ValueType ? Key : never }[keyof T]
+>
+
+/*
+[ValueType] extends [T[Key]]
+[...]는 유니온 타입에 분산 조건 타입(distributive conditional type)으로 취급하지 말라는 뜻.
+이 경우에 만약 ValueType가 유니온 타입이어도 원소를 순회하지 않고 타입 자체를 비교함.
+*/
+export type PickByValueExact<T, ValueType> = Pick<
+    T,
+    {
+        [Key in keyof T]-?: [ValueType] extends [T[Key]] ?
+            [T[Key]] extends [ValueType]
+                    ? Key
+                    : never
+            : never;
+    }[keyof T]
+>;
+
+export type Omit<T, K> = Pick<T, SetDifference<keyof T, K>>;
