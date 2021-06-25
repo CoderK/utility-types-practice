@@ -212,3 +212,20 @@ export type PickByValueExact<T, ValueType> = Pick<
 >;
 
 export type Omit<T, K> = Pick<T, SetDifference<keyof T, K>>;
+
+export type OmitByValue<T, ValueType> = Pick<
+    T,
+    { [Key in keyof T]-?: T[Key] extends ValueType ? never: Key }[keyof T]
+>;
+
+export type OmitByValueExact<T, ValueType> = Pick<
+    T,
+    {
+        [Key in keyof T]-?:
+            [T[Key]] extends [ValueType] ?
+                [ValueType] extends [T[Key]] ? never : Key
+                : Key
+    }[keyof T]
+>;
+
+export type Intersection<T, U> = Pick<T, Extract<keyof T, keyof U> & Extract<keyof U, keyof T>>;
