@@ -229,3 +229,19 @@ export type OmitByValueExact<T, ValueType> = Pick<
 >;
 
 export type Intersection<T, U> = Pick<T, Extract<keyof T, keyof U> & Extract<keyof U, keyof T>>;
+
+/*
+"keyof T extends keyof U ? never : keyof T"는, SetDifference<keyof T, keyof U>와 동치
+*/
+export type Diff<T, U> = Pick<T, keyof T extends keyof U ? never : keyof T>
+
+export type Subtract<T, T1> = Extract<T, SetDifference<T, T1>>;
+
+/*
+I = Diff<T, U> & Intersection<U, T>
+T와 U의 여집합 + U와 T의 교집합을 구함 -> T의 고유 속성과 U와 T의 공통 속성을 갖는 새로운 집합 생성.
+
+Pick<I, keyof I>
+위에서 만든 새로운 집합을 키와 속성으로 갖는 타입 반환
+*/
+export type Overwrite<T, U, I = Diff<T, U> & Intersection<U, T>> = Pick<I, keyof I>;
