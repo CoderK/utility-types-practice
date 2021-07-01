@@ -245,3 +245,16 @@ Pick<I, keyof I>
 위에서 만든 새로운 집합을 키와 속성으로 갖는 타입 반환
 */
 export type Overwrite<T, U, I = Diff<T, U> & Intersection<U, T>> = Pick<I, keyof I>;
+
+/*
+T와 U - T의 합집합을 I로 정의하고, Pick 유틸 타입으로 키와 값을 갖는 타입 개체를 추출
+ */
+export type Assign<
+  T extends object,
+  U extends object,
+  I = T & Diff<U, T>
+  > = Pick<I, keyof I>;
+
+
+export type Unionize<T> = { [K in keyof T]: { [P in K]: T[P] } }[keyof T];
+
