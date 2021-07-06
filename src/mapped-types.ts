@@ -258,3 +258,15 @@ export type Assign<
 
 export type Unionize<T> = { [K in keyof T]: { [P in K]: T[P] } }[keyof T];
 
+/*
+infer는 런타임에 타입을 추론한 결과를 타입 파라미터에 할당하는 연산자.
+"T extends Promise<infer U>"는 Promise의 타입 파라미터를 추론한 결과를 U에 할당.
+런타임에 타입을 추론한 결과를 어딘가에 담고 싶을 때 infer를 사용할 수 있음.
+*/
+export type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
+
+/*
+아래 글을 읽고 이해하는 게 빠름.
+https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d
+*/
+export type Brand<T, U> = T & { __brand: U };
