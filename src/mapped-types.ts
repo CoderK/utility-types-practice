@@ -270,3 +270,17 @@ export type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U
 https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d
 */
 export type Brand<T, U> = T & { __brand: U };
+
+export type Optional<T extends object, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
+export type ValuesType<T extends ArrayLike<any> | Record<any, any>>
+    = T extends ArrayLike<any> ? T[number] : T[keyof T];
+
+
+/*
+네이티브 Required 유틸 타입은 T의 모든 속성을 필수로 만듦.
+AugmentedRequired는 원하는 속성만 필수로 만들 수 있는 강화된 기능을 제공함.
+*/
+export type AugmentedRequired<T extends object, K extends keyof T>
+    = Omit<T, K> & Required<Pick<T, K>>
+
